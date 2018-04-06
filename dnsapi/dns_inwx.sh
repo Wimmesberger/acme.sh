@@ -172,7 +172,7 @@ _get_root() {
   while true; do
     h=$(printf "%s" "$domain" | cut -d . -f $i-100)
     _debug h "$h"
-    if [ -z "$h" ]; then
+    if [[ -z "$h" && "$h" != *"."* ]]; then
       #not valid
       return 1
     fi
