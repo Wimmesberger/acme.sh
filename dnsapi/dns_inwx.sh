@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 #
 #INWX_User="username"
@@ -163,12 +163,23 @@ _get_root() {
 
   _H1=$(_inwx_login)
   export _H1
-  xml_content='<?xml version="1.0" encoding="UTF-8"?>
+  xml_content_template='<?xml version="1.0" encoding="UTF-8"?>
   <methodCall>
   <methodName>nameserver.list</methodName>
+  <params>
+    <param>
+      <value>
+        <struct>
+          <member>
+            <name>domain</name>
+            <value><string>%s</string></value>
+          </member>
+        </struct>
+      </value>
+    </param>
+  </params>
   </methodCall>'
 
-  response="$(_post "$xml_content" "$INWX_Api" "" "POST")"
   while true; do
     h=$(printf "%s" "$domain" | cut -d . -f $i-100)
     _debug h "$h"
@@ -176,6 +187,9 @@ _get_root() {
       #not valid
       return 1
     fi
+
+    xml_content=$(printf "$xml_content_template" "$h")
+    response="$(_post "$xml_content" "$INWX_Api" "" "POST")"
 
     if _contains "$response" "<string>$h</string>"; then
       _sub_domain=$(printf "%s" "$domain" | cut -d . -f 1-$p)
